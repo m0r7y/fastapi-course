@@ -1,0 +1,35 @@
+version: 2.1
+
+jobs:
+  build:
+    working_directory: ~/circleci-python
+    docker:
+      - image: "cimg/python:3.9"
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - python/install-packages:
+          pip-dependency-file: requirements.txt
+          pkg-manager: pip
+      - run: uvicorn main:app --host 0.0.0.0 --port 8080
+  pre_commit:
+    working_directory: ~/circleci-python
+    docker:
+      - image: "cimg/python:3.9"
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - python/install-packages:
+          pip-dependency-file: requirements.txt
+          pkg-manager: pip
+      - run: pre-commit run --all-files
+
+workflows:
+  build_and_test:
+    jobs:
+      - build
+      - pre_commit:
+          requires:
+            - build
